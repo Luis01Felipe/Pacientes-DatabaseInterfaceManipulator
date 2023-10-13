@@ -34,10 +34,6 @@ namespace GUI_C_
 
             GerarTabela();
 
-            // Defina o diretório de trabalho atual para o local do executável
-            string diretorioAtual = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Directory.SetCurrentDirectory(diretorioAtual);
-
         }
 
         private void GerarTabela()
@@ -246,6 +242,14 @@ namespace GUI_C_
             }
         }
 
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Digite os dados a serem inseridos nas caixas de texto correspondentes. O único dado obrigatório a ser preenchido é o ID. " +
+                "Quando terminar, clique em Adicionar. Se desejar visualizar os dados de um paciente específico, insira o ID correspondente e, em seguida, " +
+                "clique em Selecionar. Para atualizar informações, preencha o campo ID com as alterações desejadas e pressione Atualizar. " +
+                "O mesmo procedimento se aplica para excluir informações. O botão Limpar permite remover o texto das caixas de texto. " +
+                "A janela ao lado permite que o usuário visualize todas as informações em tempo real.\r\n\r\n");
+        }
     }
 }
 

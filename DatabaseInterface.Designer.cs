@@ -55,6 +55,7 @@
             this.tbObs = new System.Windows.Forms.TextBox();
             this.lbObs = new System.Windows.Forms.Label();
             this.visãoTabela = new System.Windows.Forms.DataGridView();
+            this.btnHelp = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.visãoTabela)).BeginInit();
             this.SuspendLayout();
             // 
@@ -331,12 +332,28 @@
             this.visãoTabela.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
             this.visãoTabela.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.visãoTabela.Location = new System.Drawing.Point(382, 24);
-            this.visãoTabela.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.visãoTabela.Margin = new System.Windows.Forms.Padding(2);
             this.visãoTabela.Name = "visãoTabela";
             this.visãoTabela.RowHeadersWidth = 51;
             this.visãoTabela.RowTemplate.Height = 24;
             this.visãoTabela.Size = new System.Drawing.Size(648, 330);
             this.visãoTabela.TabIndex = 27;
+            // 
+            // btnHelp
+            // 
+            this.btnHelp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
+            this.btnHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.btnHelp.FlatAppearance.BorderSize = 0;
+            this.btnHelp.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnHelp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnHelp.ForeColor = System.Drawing.Color.White;
+            this.btnHelp.Location = new System.Drawing.Point(955, 359);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(75, 23);
+            this.btnHelp.TabIndex = 28;
+            this.btnHelp.Text = "Ajuda";
+            this.btnHelp.UseVisualStyleBackColor = false;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
             // 
             // WindowManipulate
             // 
@@ -346,7 +363,8 @@
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(34)))), ((int)(((byte)(50)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.ClientSize = new System.Drawing.Size(1055, 417);
+            this.ClientSize = new System.Drawing.Size(1054, 417);
+            this.Controls.Add(this.btnHelp);
             this.Controls.Add(this.visãoTabela);
             this.Controls.Add(this.tbObs);
             this.Controls.Add(this.lbObs);
@@ -415,6 +433,7 @@
         private System.Windows.Forms.TextBox tbObs;
         private System.Windows.Forms.Label lbObs;
         private System.Windows.Forms.DataGridView visãoTabela;
+        private System.Windows.Forms.Button btnHelp;
     }
 }
 
