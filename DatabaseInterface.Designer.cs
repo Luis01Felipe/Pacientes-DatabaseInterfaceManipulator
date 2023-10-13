@@ -329,7 +329,10 @@
             // 
             // visãoTabela
             // 
+            this.visãoTabela.AllowUserToAddRows = false;
+            this.visãoTabela.AllowUserToDeleteRows = false;
             this.visãoTabela.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
+            this.visãoTabela.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.visãoTabela.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.visãoTabela.Location = new System.Drawing.Point(382, 24);
             this.visãoTabela.Margin = new System.Windows.Forms.Padding(2);

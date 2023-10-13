@@ -31,7 +31,8 @@ namespace GUI_C_
             this.TransparencyKey = Color.Empty;
 
             myConnectionString = "server=localhost;database=pacientes;uid=root;pwd=pateta;";
-
+            
+            visãoTabela.ReadOnly = true;
             GerarTabela();
 
         }
@@ -48,6 +49,7 @@ namespace GUI_C_
             adapter.Fill(dataSet, "YourTable");
 
             visãoTabela.DataSource = dataSet.Tables["YourTable"];
+            
         }
 
 
