@@ -54,9 +54,10 @@
             this.tbAfterQui = new System.Windows.Forms.TextBox();
             this.tbObs = new System.Windows.Forms.TextBox();
             this.lbObs = new System.Windows.Forms.Label();
-            this.visãoTabela = new System.Windows.Forms.DataGridView();
+            this.dgvTableView = new System.Windows.Forms.DataGridView();
             this.btnHelp = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.visãoTabela)).BeginInit();
+            this.btnUpdateTableView = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTableView)).BeginInit();
             this.SuspendLayout();
             // 
             // lbID
@@ -182,6 +183,8 @@
             this.tbDate.Name = "tbDate";
             this.tbDate.Size = new System.Drawing.Size(93, 20);
             this.tbDate.TabIndex = 12;
+            this.tbDate.TextChanged += new System.EventHandler(this.tbDate_TextChanged);
+            this.tbDate.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbDate_KeyPress);
             // 
             // lbDate
             // 
@@ -220,6 +223,9 @@
             this.tbArrive.Name = "tbArrive";
             this.tbArrive.Size = new System.Drawing.Size(93, 20);
             this.tbArrive.TabIndex = 16;
+            this.tbArrive.TextChanged += new System.EventHandler(this.tbArrive_TextChanged);
+            this.tbArrive.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbArrive_KeyDown);
+            this.tbArrive.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbArrive_KeyPress);
             // 
             // lbArrivel
             // 
@@ -327,20 +333,20 @@
             this.lbObs.Text = "Observações:";
             this.lbObs.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // visãoTabela
+            // dgvTableView
             // 
-            this.visãoTabela.AllowUserToAddRows = false;
-            this.visãoTabela.AllowUserToDeleteRows = false;
-            this.visãoTabela.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
-            this.visãoTabela.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-            this.visãoTabela.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.visãoTabela.Location = new System.Drawing.Point(382, 24);
-            this.visãoTabela.Margin = new System.Windows.Forms.Padding(2);
-            this.visãoTabela.Name = "visãoTabela";
-            this.visãoTabela.RowHeadersWidth = 51;
-            this.visãoTabela.RowTemplate.Height = 24;
-            this.visãoTabela.Size = new System.Drawing.Size(648, 330);
-            this.visãoTabela.TabIndex = 27;
+            this.dgvTableView.AllowUserToAddRows = false;
+            this.dgvTableView.AllowUserToDeleteRows = false;
+            this.dgvTableView.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
+            this.dgvTableView.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            this.dgvTableView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvTableView.Location = new System.Drawing.Point(382, 24);
+            this.dgvTableView.Margin = new System.Windows.Forms.Padding(2);
+            this.dgvTableView.Name = "dgvTableView";
+            this.dgvTableView.RowHeadersWidth = 51;
+            this.dgvTableView.RowTemplate.Height = 24;
+            this.dgvTableView.Size = new System.Drawing.Size(648, 330);
+            this.dgvTableView.TabIndex = 27;
             // 
             // btnHelp
             // 
@@ -358,6 +364,22 @@
             this.btnHelp.UseVisualStyleBackColor = false;
             this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
             // 
+            // btnUpdateTableView
+            // 
+            this.btnUpdateTableView.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
+            this.btnUpdateTableView.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.btnUpdateTableView.FlatAppearance.BorderSize = 0;
+            this.btnUpdateTableView.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnUpdateTableView.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnUpdateTableView.ForeColor = System.Drawing.Color.White;
+            this.btnUpdateTableView.Location = new System.Drawing.Point(382, 359);
+            this.btnUpdateTableView.Name = "btnUpdateTableView";
+            this.btnUpdateTableView.Size = new System.Drawing.Size(567, 23);
+            this.btnUpdateTableView.TabIndex = 29;
+            this.btnUpdateTableView.Text = "Atualizar Visão";
+            this.btnUpdateTableView.UseVisualStyleBackColor = false;
+            this.btnUpdateTableView.Click += new System.EventHandler(this.btnUpdateView_Click);
+            // 
             // WindowManipulate
             // 
             this.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
@@ -367,8 +389,9 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(21)))), ((int)(((byte)(34)))), ((int)(((byte)(50)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1054, 417);
+            this.Controls.Add(this.btnUpdateTableView);
             this.Controls.Add(this.btnHelp);
-            this.Controls.Add(this.visãoTabela);
+            this.Controls.Add(this.dgvTableView);
             this.Controls.Add(this.tbObs);
             this.Controls.Add(this.lbObs);
             this.Controls.Add(this.tbAfterQui);
@@ -402,7 +425,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Pacientes Database Interface";
             this.TransparencyKey = System.Drawing.Color.White;
-            ((System.ComponentModel.ISupportInitialize)(this.visãoTabela)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTableView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -435,8 +458,9 @@
         private System.Windows.Forms.TextBox tbAfterQui;
         private System.Windows.Forms.TextBox tbObs;
         private System.Windows.Forms.Label lbObs;
-        private System.Windows.Forms.DataGridView visãoTabela;
+        private System.Windows.Forms.DataGridView dgvTableView;
         private System.Windows.Forms.Button btnHelp;
+        private System.Windows.Forms.Button btnUpdateTableView;
     }
 }
 
