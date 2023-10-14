@@ -5,6 +5,11 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using FireSharp.Config;
+using FireSharp.Interfaces;
+using FireSharp.Response;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 /* Nomeclature:
  * 
@@ -17,9 +22,9 @@ using System.Xml.Linq;
 
 namespace GUI_C_
 {
+
     public partial class WindowManipulate : Form
     {
-        private string myConnectionString;
         public WindowManipulate()
         {
             InitializeComponent();
@@ -27,12 +32,23 @@ namespace GUI_C_
             // Reverter a propriedade TransparencyKey para o valor padrão (Color.Empty)
             this.TransparencyKey = Color.Empty;
 
-            myConnectionString = "server=localhost;database=pacientes;uid=root;pwd=pateta;";
+            client = new FireSharp.FirebaseClient(config);
 
-            dgvTableView.ReadOnly = true;
-            btnUpdateView_Click(null, null);
+            //dgvTableView.ReadOnly = true;
+            
+            //dgvTableView.AutoGenerateColumns = true; // Isso é útil para gerar colunas automaticamente com base nas propriedades do seu objeto
+
 
         }
+
+        IFirebaseConfig config = new FirebaseConfig
+        {
+            AuthSecret = "YG9GJQGnUbrsz0JCOB5Q7nlVdvcWu75lrfjZVnpz",
+            BasePath = "https://controlepacientes-d535b-default-rtdb.firebaseio.com"
+        };
+
+        IFirebaseClient client;
+
 
         private void Clear_Click(object sender, EventArgs e)
         {
@@ -50,163 +66,159 @@ namespace GUI_C_
 
         private void Add_Click(object sender, EventArgs e)
         {
-            MySqlConnection cnn = new MySqlConnection(myConnectionString);
-            try
+            var data = new
             {
-                cnn.Open();
-                MessageBox.Show("Conexão Aberta!");
+                ID = tbID.Text,
+                Nome = tbName.Text,
+                DataQui = tbDate.Text,
+                Hospital = tbHospital.Text,
+                Chegada = tbArrive.Text,
+                Medicamento = tbMedicine.Text,
+                PréQui = tbPreQui.Text,
+                DuranteQui = tbDuringQui.Text,
+                ApósQui = tbAfterQui.Text,
+                Observações = tbObs.Text
+            };
 
-                // Crie a instrução SQL de INSERT
-                string query = "INSERT INTO pacientes (ID, Nome, DataQui, Hospital, Chegada, Medicamento, PréQui, DuranteQui, ApósQui, Observações) VALUES (@valor1, @valor2, @valor3, @valor4, @valor5, @valor6, @valor7, @valor8, @valor9, @valor10)";
+            SetResponse response = client.Set("pacientes/" + tbID.Text, data);
 
-                MySqlCommand cmd = new MySqlCommand(query, cnn);
-
-                // Substitua @valor1 e @valor2 pelos valores que você deseja inserir
-                cmd.Parameters.AddWithValue("@valor1", tbID.Text);
-                cmd.Parameters.AddWithValue("@valor2", tbName.Text);
-                cmd.Parameters.AddWithValue("@valor3", tbDate.Text);
-                cmd.Parameters.AddWithValue("@valor4", tbHospital.Text);
-                cmd.Parameters.AddWithValue("@valor5", tbArrive.Text);
-                cmd.Parameters.AddWithValue("@valor6", tbMedicine.Text);
-                cmd.Parameters.AddWithValue("@valor7", tbPreQui.Text);
-                cmd.Parameters.AddWithValue("@valor8", tbDuringQui.Text);
-                cmd.Parameters.AddWithValue("@valor9", tbAfterQui.Text);
-                cmd.Parameters.AddWithValue("@valor10", tbObs.Text);
-
-                // Execute o comando INSERT
-                cmd.ExecuteNonQuery();
-
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
                 MessageBox.Show("Dados Inseridos!");
-
-                cnn.Close();
                 btnUpdateView_Click(null, null);
-
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Não pode abrir conexão: " + ex.Message);
+                MessageBox.Show("Erro ao inserir dados no Firebase.");
             }
-
         }
 
         private void Selecionar_Click(object sender, EventArgs e)
         {
-            MySqlConnection cnn = new MySqlConnection(myConnectionString);
             try
             {
-                cnn.Open();
-                MessageBox.Show("Conexão Aberta!");
+                var data = client.Get("pacientes/" + tbID.Text);
 
-                // Crie a instrução SQL SELECT
-                string query = "SELECT * FROM pacientes WHERE id = @id"; // Supondo que você queira selecionar com base em um ID
-
-                MySqlCommand cmd = new MySqlCommand(query, cnn);
-
-                // Substitua @id pelo valor que você deseja selecionar
-                cmd.Parameters.AddWithValue("@id", tbID.Text);
-
-                using (MySqlDataReader reader = cmd.ExecuteReader())
+                if (data.Body != null)
                 {
-                    if (reader.Read())
-                    {
-                        // Preencha os campos de texto com os resultados da consulta
-                        tbName.Text = reader["Nome"].ToString(); // Substitua "nome" pelo nome da coluna em seu banco de dados
-                        tbDate.Text = reader["DataQui"].ToString();
-                        tbHospital.Text = reader["Hospital"].ToString();
-                        tbArrive.Text = reader["Chegada"].ToString();
-                        tbMedicine.Text = reader["Medicamento"].ToString();
-                        tbPreQui.Text = reader["PréQui"].ToString();
-                        tbDuringQui.Text = reader["DuranteQui"].ToString();
-                        tbAfterQui.Text = reader["ApósQui"].ToString();
-                        tbObs.Text = reader["Observações"].ToString();
+                    var paciente = data.ResultAs<Paciente>(); // Certifique-se de criar uma classe "Paciente" para mapear os dados.
 
-                        MessageBox.Show("Registro encontrado.");
+                    tbName.Text = paciente.Nome;
+                    tbDate.Text = paciente.DataQui;
+                    tbHospital.Text = paciente.Hospital;
+                    tbArrive.Text = paciente.Chegada;
+                    tbMedicine.Text = paciente.Medicamento;
+                    tbPreQui.Text = paciente.PréQui;
+                    tbDuringQui.Text = paciente.DuranteQui;
+                    tbAfterQui.Text = paciente.ApósQui;
+                    tbObs.Text = paciente.Observações;
+
+                    MessageBox.Show("Registro encontrado.");
+                }
+                else
+                {
+                    MessageBox.Show("Nenhum registro encontrado.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao buscar o registro: " + ex.Message);
+            }
+
+
+        }
+
+        private async void btnDelete_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Crie uma instância do FirebaseClient com sua configuração
+                var firebaseClient = new FireSharp.FirebaseClient(config);
+
+                // Substitua "seu_nó" pelo caminho correto em seu banco de dados
+                var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    MessageBox.Show("Registro excluído com sucesso!");
+                    Clear_Click(sender, e);
+                    btnUpdateView_Click(sender, e);
+                }
+                else
+                {
+                    MessageBox.Show("Falha ao excluir o registro. Verifique o ID.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir o registro: " + ex.Message);
+            }
+        }
+
+        private async void btnUpdate_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var firebaseClient = new FireSharp.FirebaseClient(config);
+
+                var data = client.Get("pacientes/" + tbID.Text);
+
+                if (data.Body != null)
+                {
+                    var paciente = data.ResultAs<Paciente>();
+
+                    if (paciente != null)
+                    {
+                        // Atualize apenas os campos que foram preenchidos
+                        if (!string.IsNullOrEmpty(tbName.Text))
+                            paciente.Nome = tbName.Text;
+                        if (!string.IsNullOrEmpty(tbDate.Text))
+                            paciente.DataQui = tbDate.Text;
+                        if (!string.IsNullOrEmpty(tbHospital.Text))
+                            paciente.Hospital = tbHospital.Text;
+                        if (!string.IsNullOrEmpty(tbArrive.Text))
+                            paciente.Chegada = tbArrive.Text;
+                        if (!string.IsNullOrEmpty(tbMedicine.Text))
+                            paciente.Medicamento = tbMedicine.Text;
+                        if (!string.IsNullOrEmpty(tbPreQui.Text))
+                            paciente.PréQui = tbPreQui.Text;
+                        if (!string.IsNullOrEmpty(tbDuringQui.Text))
+                            paciente.DuranteQui = tbDuringQui.Text;
+                        if (!string.IsNullOrEmpty(tbAfterQui.Text))
+                            paciente.ApósQui = tbAfterQui.Text;
+                        if (!string.IsNullOrEmpty(tbObs.Text))
+                            paciente.Observações = tbObs.Text;
+
+                        // Agora, atualize o registro com os campos relevantes
+                        var response = await firebaseClient.UpdateAsync("pacientes/" + tbID.Text, paciente);
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            MessageBox.Show("Registro atualizado com sucesso!");
+                            //Clear_Click(sender, e);
+                            btnUpdateView_Click(sender, e);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Falha ao atualizar o registro. Verifique o ID.");
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Nenhum registro encontrado.");
+                        MessageBox.Show("Registro não foi carregado corretamente. Verifique a estrutura dos dados no Firebase.");
                     }
                 }
-
-                cnn.Close();
-
+                else
+                {
+                    MessageBox.Show("Nenhum registro encontrado para atualizar.");
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Não pode abrir conexão: " + ex.Message);
+                MessageBox.Show("Erro ao atualizar o registro: " + ex.Message);
             }
 
-        }
 
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            MySqlConnection cnn = new MySqlConnection(myConnectionString);
-            try
-            {
-                cnn.Open();
-                MessageBox.Show("Conexão Aberta!");
-
-                string query = "DELETE FROM pacientes WHERE ID=@valor1";
-
-                MySqlCommand cmd = new MySqlCommand(query, cnn);
-
-                cmd.Parameters.AddWithValue("@valor1", tbID.Text);
-
-                cmd.ExecuteNonQuery();
-
-                MessageBox.Show("Dados Deletados!");
-
-                cnn.Close();
-                btnUpdateView_Click(null, null);
-                Clear_Click(sender, e);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Não pode abrir conexão: " + ex.Message);
-            }
-        }
-
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            MySqlConnection cnn = new MySqlConnection(myConnectionString);
-            try
-            {
-                cnn.Open();
-                MessageBox.Show("Conexão Aberta!");
-
-                // Crie a instrução SQL de UPDATE com uma cláusula WHERE para especificar o registro a ser atualizado
-                string query = "UPDATE pacientes SET Nome = IF(@valor1 <> '', @valor1, Nome), DataQui = IF(@valor2 <> '', @valor2, DataQui), Hospital = IF(@valor3 <> '', @valor3, Hospital), Chegada = IF(@valor4 <> '', @valor4, Chegada), Medicamento = IF(@valor5 <> '', @valor5, Medicamento), PréQui = IF(@valor6 <> '', @valor6, PréQui), DuranteQui = IF(@valor7 <> '', @valor7, DuranteQui), ApósQui = IF(@valor8 <> '', @valor8, ApósQui), Observações = IF(@valor9 <> '', @valor9, Observações) WHERE ID = @id";
-
-                MySqlCommand cmd = new MySqlCommand(query, cnn);
-
-                // Substitua @valor1 a @valor9 pelos valores que você deseja atualizar
-                cmd.Parameters.AddWithValue("@valor1", tbName.Text);
-                cmd.Parameters.AddWithValue("@valor2", tbDate.Text);
-                cmd.Parameters.AddWithValue("@valor3", tbHospital.Text);
-                cmd.Parameters.AddWithValue("@valor4", tbArrive.Text);
-                cmd.Parameters.AddWithValue("@valor5", tbMedicine.Text);
-                cmd.Parameters.AddWithValue("@valor6", tbPreQui.Text);
-                cmd.Parameters.AddWithValue("@valor7", tbDuringQui.Text);
-                cmd.Parameters.AddWithValue("@valor8", tbAfterQui.Text);
-                cmd.Parameters.AddWithValue("@valor9", tbObs.Text);
-
-                // Substitua @id pelo ID do registro que você deseja atualizar
-                cmd.Parameters.AddWithValue("@id", tbID.Text);
-
-                // Execute o comando UPDATE
-                cmd.ExecuteNonQuery();
-
-                MessageBox.Show("Dados Atualizados!");
-
-                cnn.Close();
-                btnUpdateView_Click(null, null);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Não pode abrir conexão: " + ex.Message);
-            }
         }
 
         private void tbID_TextChanged_1(object sender, EventArgs e)
@@ -237,24 +249,7 @@ namespace GUI_C_
 
         private void btnUpdateView_Click(object sender, EventArgs e)
         {
-            MySqlConnection cnn = new MySqlConnection(myConnectionString);
-            try
-            {
-                MySqlConnection connection = new MySqlConnection(myConnectionString);
-
-                MySqlCommand command = new MySqlCommand("SELECT * FROM pacientes", connection);
-
-                MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-                DataSet dataSet = new DataSet();
-
-                adapter.Fill(dataSet, "YourTable");
-
-                dgvTableView.DataSource = dataSet.Tables["YourTable"];
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Não pode abrir conexão: " + ex.Message);
-            }
+           
         }
 
         private void tbDate_TextChanged(object sender, EventArgs e)
@@ -355,16 +350,19 @@ namespace GUI_C_
                 }
             }
         }
+    }
 
-
-        /*
-        IFirebaseConfig config = new FirebaseConfig
-        {
-           AuthSecret = "SUA_CHAVE_PRIVADA",
-           BasePath = "https://SEU_PROJETO.firebaseio.com/"
-        };
-        */
-
+    public class Paciente
+    {
+        public string Nome { get; set; }
+        public string DataQui { get; set; }
+        public string Hospital { get; set; }
+        public string Chegada { get; set; }
+        public string Medicamento { get; set; }
+        public string PréQui { get; set; }
+        public string DuranteQui { get; set; }
+        public string ApósQui { get; set; }
+        public string Observações { get; set; }
     }
 }
 
