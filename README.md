@@ -9,5 +9,6 @@ Digite os dados a serem inseridos nas caixas de texto correspondentes. O único 
 ### Futuras adições
 - [ ] Permitir que funcione em qualquer dispositivo;
 - [ ] Alto incremento no ID;
-- [ ] Ao digitar a data no formato dd/mm/yyyy o programa ira adicionar as barras conforme o texto é escrito^[Permitir que o usuário digite apenas números];
-- [ ] Ao digitar o Horário no formato hh:mm o programa ira adicionar o dois pontos conforme o texto é escrito^[Permitir que o usuário digite apenas números];
+- [x] Ao digitar a data no formato dd/mm/yyyy o programa ira adicionar as barras conforme o texto é escrito^[Permitir que o usuário digite apenas números];
+- [x] Ao digitar o Horário no formato hh:mm o programa ira adicionar o dois pontos conforme o texto é escrito^[Permitir que o usuário digite apenas números];
+- [x] Conexão com Firebase ao invés do mySQL;
