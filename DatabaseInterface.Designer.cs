@@ -224,7 +224,6 @@
             this.tbArrive.Size = new System.Drawing.Size(93, 20);
             this.tbArrive.TabIndex = 16;
             this.tbArrive.TextChanged += new System.EventHandler(this.tbArrive_TextChanged);
-            this.tbArrive.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbArrive_KeyDown);
             this.tbArrive.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbArrive_KeyPress);
             // 
             // lbArrivel
@@ -337,16 +336,21 @@
             // 
             this.dgvTableView.AllowUserToAddRows = false;
             this.dgvTableView.AllowUserToDeleteRows = false;
+            this.dgvTableView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgvTableView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dgvTableView.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(60)))), ((int)(((byte)(88)))));
             this.dgvTableView.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.dgvTableView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvTableView.Cursor = System.Windows.Forms.Cursors.Default;
             this.dgvTableView.Location = new System.Drawing.Point(382, 24);
-            this.dgvTableView.Margin = new System.Windows.Forms.Padding(2);
+            this.dgvTableView.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.dgvTableView.Name = "dgvTableView";
+            this.dgvTableView.ReadOnly = true;
             this.dgvTableView.RowHeadersWidth = 51;
             this.dgvTableView.RowTemplate.Height = 24;
             this.dgvTableView.Size = new System.Drawing.Size(648, 330);
             this.dgvTableView.TabIndex = 27;
+            this.dgvTableView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvTableView_CellDoubleClick);
             // 
             // btnHelp
             // 

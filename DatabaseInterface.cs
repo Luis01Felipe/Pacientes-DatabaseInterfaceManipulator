@@ -1,15 +1,13 @@
-﻿using MySql.Data.MySqlClient;
-using System;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using FireSharp.Config;
+﻿using FireSharp.Config;
 using FireSharp.Interfaces;
 using FireSharp.Response;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
 
 /* Nomeclature:
  * 
@@ -22,24 +20,19 @@ using System.ComponentModel;
 
 namespace GUI_C_
 {
-
     public partial class WindowManipulate : Form
     {
+        private IFirebaseClient client;
+
         public WindowManipulate()
         {
             InitializeComponent();
-
-            // Reverter a propriedade TransparencyKey para o valor padrão (Color.Empty)
             this.TransparencyKey = Color.Empty;
-
             client = new FireSharp.FirebaseClient(config);
 
-            //dgvTableView.ReadOnly = true;
-            
-            //dgvTableView.AutoGenerateColumns = true; // Isso é útil para gerar colunas automaticamente com base nas propriedades do seu objeto
-
-
+            PreencherDataGridViewFirebase();
         }
+
 
         IFirebaseConfig config = new FirebaseConfig
         {
@@ -47,8 +40,38 @@ namespace GUI_C_
             BasePath = "https://controlepacientes-d535b-default-rtdb.firebaseio.com"
         };
 
-        IFirebaseClient client;
+        private void PreencherDataGridViewFirebase()
+        {
+            try
+            {
+                var firebaseClient = new FireSharp.FirebaseClient(config);
 
+                var data = firebaseClient.Get("pacientes");
+
+                if (data.Body != "null")
+                {
+                    var jsonArray = JArray.Parse(data.Body);
+                    var pacientes = jsonArray.ToObject<List<Paciente>>();
+
+                    if (pacientes.Count > 0)
+                    {
+                        dgvTableView.DataSource = pacientes;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nenhum registro de paciente encontrado.");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Nenhum registro encontrado para exibir.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao exibir registros: " + ex.Message);
+            }
+        }
 
         private void Clear_Click(object sender, EventArgs e)
         {
@@ -101,7 +124,7 @@ namespace GUI_C_
 
                 if (data.Body != null)
                 {
-                    var paciente = data.ResultAs<Paciente>(); // Certifique-se de criar uma classe "Paciente" para mapear os dados.
+                    var paciente = data.ResultAs<Paciente>();
 
                     tbName.Text = paciente.Nome;
                     tbDate.Text = paciente.DataQui;
@@ -111,7 +134,7 @@ namespace GUI_C_
                     tbPreQui.Text = paciente.PréQui;
                     tbDuringQui.Text = paciente.DuranteQui;
                     tbAfterQui.Text = paciente.ApósQui;
-                    tbObs.Text = paciente.Observações;
+                    tbObs.Text = paciente.Observacoes;
 
                     MessageBox.Show("Registro encontrado.");
                 }
@@ -124,29 +147,31 @@ namespace GUI_C_
             {
                 MessageBox.Show("Erro ao buscar o registro: " + ex.Message);
             }
-
-
         }
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
             try
             {
-                // Crie uma instância do FirebaseClient com sua configuração
-                var firebaseClient = new FireSharp.FirebaseClient(config);
-
-                // Substitua "seu_nó" pelo caminho correto em seu banco de dados
-                var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                if (tbID.Text != "0")
                 {
-                    MessageBox.Show("Registro excluído com sucesso!");
-                    Clear_Click(sender, e);
-                    btnUpdateView_Click(sender, e);
+                    var firebaseClient = new FireSharp.FirebaseClient(config);
+                    var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        MessageBox.Show("Registro excluído com sucesso!");
+                        Clear_Click(sender, e);
+                        btnUpdateView_Click(sender, e);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Falha ao excluir o registro. Verifique o ID.");
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Falha ao excluir o registro. Verifique o ID.");
+                    MessageBox.Show("Não é possível excluir o registro de ID 0.");
                 }
             }
             catch (Exception ex)
@@ -160,7 +185,6 @@ namespace GUI_C_
             try
             {
                 var firebaseClient = new FireSharp.FirebaseClient(config);
-
                 var data = client.Get("pacientes/" + tbID.Text);
 
                 if (data.Body != null)
@@ -187,15 +211,13 @@ namespace GUI_C_
                         if (!string.IsNullOrEmpty(tbAfterQui.Text))
                             paciente.ApósQui = tbAfterQui.Text;
                         if (!string.IsNullOrEmpty(tbObs.Text))
-                            paciente.Observações = tbObs.Text;
+                            paciente.Observacoes = tbObs.Text;
 
-                        // Agora, atualize o registro com os campos relevantes
                         var response = await firebaseClient.UpdateAsync("pacientes/" + tbID.Text, paciente);
 
                         if (response.StatusCode == System.Net.HttpStatusCode.OK)
                         {
                             MessageBox.Show("Registro atualizado com sucesso!");
-                            //Clear_Click(sender, e);
                             btnUpdateView_Click(sender, e);
                         }
                         else
@@ -217,15 +239,12 @@ namespace GUI_C_
             {
                 MessageBox.Show("Erro ao atualizar o registro: " + ex.Message);
             }
-
-
         }
 
         private void tbID_TextChanged_1(object sender, EventArgs e)
         {
             if (!int.TryParse(tbID.Text, out int result))
             {
-                // Se o texto não puder ser convertido para um número inteiro, você pode mostrar uma mensagem de erro.
                 if (tbID.Text != string.Empty)
                 {
                     MessageBox.Show("O ID deve ser um número inteiro de até quatro dígitos.");
@@ -239,43 +258,18 @@ namespace GUI_C_
         {
             MessageBox.Show
                 (
-                "Digite os dados a serem inseridos nas caixas de texto correspondentes. O único dado obrigatório a ser preenchido é o ID. " +
-                "Quando terminar, clique em Adicionar. Se desejar visualizar os dados de um paciente específico, insira o ID correspondente e, em seguida, " +
-                "clique em Selecionar. Para atualizar informações, preencha o campo ID com as alterações desejadas e pressione Atualizar. " +
-                "O mesmo procedimento se aplica para excluir informações. O botão Limpar permite remover o texto das caixas de texto. " +
-                "A janela ao lado permite que o usuário visualize todas as informações em tempo real.\r\n\r\n"
+                "Digite os dados nas caixas de texto e clique em 'Adicionar' para inserir um novo registro.\n\n" +
+                "Para atualizar um registro, digite o ID do registro que deseja atualizar e clique em 'Selecionar'. Os dados do registro serão carregados nas caixas de texto. Altere os dados que deseja atualizar e clique em 'Atualizar'.\n\n" +
+                "Para excluir um registro, digite o ID do registro que deseja excluir e clique em 'Excluir'.\n\n" +
+                "Para visualizar um registro, digite o ID do registro que deseja visualizar e clique em 'Selecionar' ou clique duas vezes em uma celula da tabela correspondente a linha do registro. Os dados do registro serão carregados nas caixas de texto.\n\n" +
+                "Para limpar as caixas de texto, clique em 'Limpar'.\n\n" +
+                "Para atualizar visualização da tabela de registros, clique em 'Atualizar Tabela'.\n\n"
                 );
         }
 
         private void btnUpdateView_Click(object sender, EventArgs e)
         {
-           
-        }
-
-        private void tbDate_TextChanged(object sender, EventArgs e)
-        {
-            if (tbDate.Text.Length == 2 || tbDate.Text.Length == 5)
-            {
-                tbDate.Text += "/"; // Adiciona a barra nas posições corretas
-                tbDate.SelectionStart = tbDate.Text.Length; // Coloca o cursor no final
-            }
-
-            if (tbDate.Text.Length >= 10)
-            {
-                tbDate.Text = tbDate.Text.Substring(0, 10); // Limita a data a 10 caracteres (dd/mm/yyyy)
-            }
-
-            // Verifica se o dia (dd) está dentro do limite (1 a 31)
-            if (tbDate.Text.Length >= 2 && int.Parse(tbDate.Text.Substring(0, 2)) > 31)
-            {
-                tbDate.Text = "31" + tbDate.Text.Substring(2);
-            }
-
-            // Verifica se o mês (mm) está dentro do limite (1 a 12)
-            if (tbDate.Text.Length >= 5 && int.Parse(tbDate.Text.Substring(3, 2)) > 12)
-            {
-                tbDate.Text = tbDate.Text.Substring(0, 3) + "12" + tbDate.Text.Substring(5);
-            }
+            PreencherDataGridViewFirebase();
         }
 
         private void tbDate_KeyPress(object sender, KeyPressEventArgs e)
@@ -284,6 +278,42 @@ namespace GUI_C_
             if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
             {
                 e.Handled = true; // Impede a entrada do caractere não desejado
+            }
+        }
+
+        private void tbDate_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tbDate.Text.Length == 2 || tbDate.Text.Length == 5)
+                {
+                    tbDate.Text += "/";
+                    tbDate.SelectionStart = tbDate.Text.Length; // Coloca o cursor no final
+                }
+
+                // Verifica se o dia (dd) está dentro do limite (1 a 31)
+                if (tbDate.Text.Length >= 2 && int.Parse(tbDate.Text.Substring(0, 2)) > 31)
+                {
+                    tbDate.Text = "31" + tbDate.Text.Substring(2);
+                }
+
+                // Verifica se o mês (mm) está dentro do limite (1 a 12)
+                if (tbDate.Text.Length >= 5 && int.Parse(tbDate.Text.Substring(3, 2)) > 12)
+                {
+                    tbDate.Text = tbDate.Text.Substring(0, 3) + "12" + tbDate.Text.Substring(5);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("A cadeia de caracteres de entrada não estava em um formato correto."))
+                {
+                    MessageBox.Show("Erro ao alterar a data. Este erro ocorre quando tenta-se apagar um valor antes da barra (/) na data. Por favor, insira uma data válida no formato 'dd/mm/yyyy'.");
+                }
+                else
+                {
+                    MessageBox.Show("Erro ao alterar a data: " + ex.Message);
+                }
+                tbDate.Text = string.Empty;
             }
         }
 
@@ -298,55 +328,60 @@ namespace GUI_C_
 
         private void tbArrive_TextChanged(object sender, EventArgs e)
         {
-            if (tbArrive.Text.Length == 2)
+            try
             {
-                tbArrive.Text += ":"; // Adiciona a barra nas posições corretas
-                tbArrive.SelectionStart = tbArrive.Text.Length; // Coloca o cursor no final
-            }
-
-            // Verifica se as horas (hh) está dentro do limite (1 a 12)
-            if (tbArrive.Text.Length >= 2)
-            {
-                int hours = int.Parse(tbArrive.Text.Substring(0, 2));
-                if (hours > 12)
+                if (tbArrive.Text.Length == 2 & !(tbArrive.Text.Contains(":")))
                 {
-                    tbArrive.Text = "12" + tbArrive.Text.Substring(2);
+                    tbArrive.Text += ":";
+                    tbArrive.SelectionStart = tbArrive.Text.Length; // Coloca o cursor no final
+                }
+
+                // Verifica se as horas (hh) está dentro do limite (1 a 12)
+                if (tbArrive.Text.Length >= 2)
+                {
+                    int hours = int.Parse(tbArrive.Text.Substring(0, 2));
+                    if (hours > 24)
+                    {
+                        tbArrive.Text = "24" + tbArrive.Text.Substring(2);
+                    }
+                }
+
+                // Verifica se os minutos (mm) estão dentro do limite (0 a 59)
+                if (tbArrive.Text.Length >= 5)
+                {
+                    int minutes = int.Parse(tbArrive.Text.Substring(3, 2));
+                    if (minutes > 59)
+                    {
+                        tbArrive.Text = tbArrive.Text.Substring(0, 3) + "59";
+                    }
                 }
             }
-
-            // Verifica se os minutos (mm) estão dentro do limite (0 a 59)
-            if (tbArrive.Text.Length >= 5)
+            catch (Exception ex)
             {
-                int minutes = int.Parse(tbArrive.Text.Substring(3, 2));
-                if (minutes > 59)
+                if (ex.Message.Contains("A cadeia de caracteres de entrada não estava em um formato correto."))
                 {
-                    tbArrive.Text = tbArrive.Text.Substring(0, 3) + "59";
+                    MessageBox.Show("Erro ao alterar a hora. Este erro ocorre quando tenta-se apagar um valor após os dois pontos (:) no horário. Por favor, insira um horário válido no formato 'hh:mm'.");
                 }
+                else
+                {
+                    MessageBox.Show("Erro ao alterar a hora: " + ex.Message);
+                }
+                tbArrive.Text = string.Empty;
             }
         }
 
-        private void tbArrive_KeyDown(object sender, KeyEventArgs e)
+        private void dgvTableView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Verifica se a tecla pressionada é o 'Backspace'
-            if (e.KeyCode == Keys.Back)
+            if (e.RowIndex >= 0)
             {
-                // Obtém o texto atual do TextBox
-                string text = tbArrive.Text;
-
-                // Verifica se o texto contém ':' na última posição
-                if (text.EndsWith(":"))
+                // Verifica se o evento ocorreu em uma linha válida
+                DataGridViewRow selectedRow = dgvTableView.Rows[e.RowIndex];
+                if (selectedRow.Cells["ID"].Value != null)
                 {
-                    // Remove o último caractere (':') do texto
-                    text = text.Substring(0, text.Length - 1);
-
-                    // Define o texto atual do TextBox
-                    tbArrive.Text = text;
-
-                    // Define o cursor para o final do texto
-                    tbArrive.SelectionStart = text.Length;
-
-                    // Marca o evento como manipulado (para evitar que o Backspace exclua outros caracteres)
-                    e.Handled = true;
+                    // Obtém o valor da coluna "ID" da linha clicada
+                    string idValue = selectedRow.Cells["ID"].Value.ToString();
+                    tbID.Text = idValue;
+                    Selecionar_Click(sender, e);
                 }
             }
         }
@@ -354,15 +389,35 @@ namespace GUI_C_
 
     public class Paciente
     {
+        [JsonProperty("ID")]
+        public string ID { get; set; }
+
+        [JsonProperty("Nome")]
         public string Nome { get; set; }
+
+        [JsonProperty("DataQui")]
         public string DataQui { get; set; }
+
+        [JsonProperty("Hospital")]
         public string Hospital { get; set; }
+
+        [JsonProperty("Chegada")]
         public string Chegada { get; set; }
+
+        [JsonProperty("Medicamento")]
         public string Medicamento { get; set; }
+
+        [JsonProperty("PréQui")]
         public string PréQui { get; set; }
+
+        [JsonProperty("DuranteQui")]
         public string DuranteQui { get; set; }
+
+        [JsonProperty("ApósQui")]
         public string ApósQui { get; set; }
-        public string Observações { get; set; }
+
+        [JsonProperty("Observações")]
+        public string Observacoes { get; set; }
     }
 }
 
