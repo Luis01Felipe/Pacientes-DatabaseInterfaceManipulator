@@ -89,32 +89,50 @@ namespace GUI_C_
 
         private void Add_Click(object sender, EventArgs e)
         {
-            var data = new
+            try
             {
-                ID = tbID.Text,
-                Nome = tbName.Text,
-                DataQui = tbDate.Text,
-                Hospital = tbHospital.Text,
-                Chegada = tbArrive.Text,
-                Medicamento = tbMedicine.Text,
-                PréQui = tbPreQui.Text,
-                DuranteQui = tbDuringQui.Text,
-                ApósQui = tbAfterQui.Text,
-                Observações = tbObs.Text
-            };
+                var firebaseClient = new FireSharp.FirebaseClient(config);
+                var existingData = firebaseClient.Get("pacientes/" + tbID.Text);
 
-            SetResponse response = client.Set("pacientes/" + tbID.Text, data);
+                if (existingData.Body != "null")
+                {
+                    MessageBox.Show("ID já existe no banco de dados. Utilize um ID único.");
+                }
+                else
+                {
+                    var data = new
+                    {
+                        ID = tbID.Text,
+                        Nome = tbName.Text,
+                        DataQui = tbDate.Text,
+                        Hospital = tbHospital.Text,
+                        Chegada = tbArrive.Text,
+                        Medicamento = tbMedicine.Text,
+                        PréQui = tbPreQui.Text,
+                        DuranteQui = tbDuringQui.Text,
+                        ApósQui = tbAfterQui.Text,
+                        Observações = tbObs.Text
+                    };
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                MessageBox.Show("Dados Inseridos!");
-                btnUpdateView_Click(null, null);
+                    SetResponse response = client.Set("pacientes/" + tbID.Text, data);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        MessageBox.Show("Dados Inseridos!");
+                        btnUpdateView_Click(null, null);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Erro ao inserir dados no Firebase.");
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Erro ao inserir dados no Firebase.");
+                MessageBox.Show("Erro ao inserir o registro: " + ex.Message);
             }
         }
+
 
         private void Selecionar_Click(object sender, EventArgs e)
         {
@@ -156,17 +174,29 @@ namespace GUI_C_
                 if (tbID.Text != "0")
                 {
                     var firebaseClient = new FireSharp.FirebaseClient(config);
-                    var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
 
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    // Verifique se o registro com o ID fornecido existe no Firebase
+                    var existingData = firebaseClient.Get("pacientes/" + tbID.Text);
+
+                    if (existingData.Body != "null")
                     {
-                        MessageBox.Show("Registro excluído com sucesso!");
-                        Clear_Click(sender, e);
-                        btnUpdateView_Click(sender, e);
+                        // Se o registro existe, prossiga com a exclusão
+                        var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            MessageBox.Show("Registro excluído com sucesso!");
+                            Clear_Click(sender, e);
+                            btnUpdateView_Click(sender, e);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Falha ao excluir o registro. Verifique o ID.");
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Falha ao excluir o registro. Verifique o ID.");
+                        MessageBox.Show("O registro com o ID fornecido não existe.");
                     }
                 }
                 else
@@ -185,54 +215,65 @@ namespace GUI_C_
             try
             {
                 var firebaseClient = new FireSharp.FirebaseClient(config);
-                var data = client.Get("pacientes/" + tbID.Text);
 
-                if (data.Body != null)
+                // Verifique se o registro com o ID fornecido existe no Firebase
+                var existingData = firebaseClient.Get("pacientes/" + tbID.Text);
+
+                if (existingData.Body != "null")
                 {
-                    var paciente = data.ResultAs<Paciente>();
+                    var data = client.Get("pacientes/" + tbID.Text);
 
-                    if (paciente != null)
+                    if (data.Body != null)
                     {
-                        // Atualize apenas os campos que foram preenchidos
-                        if (!string.IsNullOrEmpty(tbName.Text))
-                            paciente.Nome = tbName.Text;
-                        if (!string.IsNullOrEmpty(tbDate.Text))
-                            paciente.DataQui = tbDate.Text;
-                        if (!string.IsNullOrEmpty(tbHospital.Text))
-                            paciente.Hospital = tbHospital.Text;
-                        if (!string.IsNullOrEmpty(tbArrive.Text))
-                            paciente.Chegada = tbArrive.Text;
-                        if (!string.IsNullOrEmpty(tbMedicine.Text))
-                            paciente.Medicamento = tbMedicine.Text;
-                        if (!string.IsNullOrEmpty(tbPreQui.Text))
-                            paciente.PréQui = tbPreQui.Text;
-                        if (!string.IsNullOrEmpty(tbDuringQui.Text))
-                            paciente.DuranteQui = tbDuringQui.Text;
-                        if (!string.IsNullOrEmpty(tbAfterQui.Text))
-                            paciente.ApósQui = tbAfterQui.Text;
-                        if (!string.IsNullOrEmpty(tbObs.Text))
-                            paciente.Observacoes = tbObs.Text;
+                        var paciente = data.ResultAs<Paciente>();
 
-                        var response = await firebaseClient.UpdateAsync("pacientes/" + tbID.Text, paciente);
-
-                        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        if (paciente != null)
                         {
-                            MessageBox.Show("Registro atualizado com sucesso!");
-                            btnUpdateView_Click(sender, e);
+                            // Atualize apenas os campos que foram preenchidos
+                            if (!string.IsNullOrEmpty(tbName.Text))
+                                paciente.Nome = tbName.Text;
+                            if (!string.IsNullOrEmpty(tbDate.Text))
+                                paciente.DataQui = tbDate.Text;
+                            if (!string.IsNullOrEmpty(tbHospital.Text))
+                                paciente.Hospital = tbHospital.Text;
+                            if (!string.IsNullOrEmpty(tbArrive.Text))
+                                paciente.Chegada = tbArrive.Text;
+                            if (!string.IsNullOrEmpty(tbMedicine.Text))
+                                paciente.Medicamento = tbMedicine.Text;
+                            if (!string.IsNullOrEmpty(tbPreQui.Text))
+                                paciente.PréQui = tbPreQui.Text;
+                            if (!string.IsNullOrEmpty(tbDuringQui.Text))
+                                paciente.DuranteQui = tbDuringQui.Text;
+                            if (!string.IsNullOrEmpty(tbAfterQui.Text))
+                                paciente.ApósQui = tbAfterQui.Text;
+                            if (!string.IsNullOrEmpty(tbObs.Text))
+                                paciente.Observacoes = tbObs.Text;
+
+                            var response = await firebaseClient.UpdateAsync("pacientes/" + tbID.Text, paciente);
+
+                            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                            {
+                                MessageBox.Show("Registro atualizado com sucesso!");
+                                btnUpdateView_Click(sender, e);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Falha ao atualizar o registro. Verifique o ID.");
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Falha ao atualizar o registro. Verifique o ID.");
+                            MessageBox.Show("Registro não foi carregado corretamente. Verifique a estrutura dos dados no Firebase.");
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Registro não foi carregado corretamente. Verifique a estrutura dos dados no Firebase.");
+                        MessageBox.Show("Nenhum registro encontrado para atualizar.");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Nenhum registro encontrado para atualizar.");
+                    MessageBox.Show("O registro com o ID fornecido não existe. Não é possível atualizá-lo.");
                 }
             }
             catch (Exception ex)
@@ -240,6 +281,7 @@ namespace GUI_C_
                 MessageBox.Show("Erro ao atualizar o registro: " + ex.Message);
             }
         }
+
 
         private void tbID_TextChanged_1(object sender, EventArgs e)
         {
@@ -307,7 +349,7 @@ namespace GUI_C_
             {
                 if (ex.Message.Contains("A cadeia de caracteres de entrada não estava em um formato correto."))
                 {
-                    MessageBox.Show("Erro ao alterar a data. Este erro ocorre quando tenta-se apagar um valor antes da barra (/) na data. Por favor, insira uma data válida no formato 'dd/mm/yyyy'.");
+                    MessageBox.Show("Erro ao alterar a data. Este erro ocorre quando tenta-se apagar um valor antes de alguma barra (/). Por favor, insira uma data válida no formato 'dd/mm/yyyy'.");
                 }
                 else
                 {
@@ -360,7 +402,7 @@ namespace GUI_C_
             {
                 if (ex.Message.Contains("A cadeia de caracteres de entrada não estava em um formato correto."))
                 {
-                    MessageBox.Show("Erro ao alterar a hora. Este erro ocorre quando tenta-se apagar um valor após os dois pontos (:) no horário. Por favor, insira um horário válido no formato 'hh:mm'.");
+                    MessageBox.Show("Erro ao alterar a hora. Este erro ocorre quando tenta-se apagar um valor antes do dois pontos (:). Por favor, insira um horário válido no formato 'hh:mm'.");
                 }
                 else
                 {
