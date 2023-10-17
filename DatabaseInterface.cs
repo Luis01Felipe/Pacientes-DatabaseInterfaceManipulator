@@ -15,7 +15,7 @@ using System.Windows.Forms;
  * lb  = Label
  * tb  = TextBox
  * dgv = DataGridView
- * s
+ * 
 */
 
 namespace GUI_C_
