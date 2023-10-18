@@ -133,7 +133,6 @@ namespace GUI_C_
             }
         }
 
-
         private void Selecionar_Click(object sender, EventArgs e)
         {
             try
@@ -171,16 +170,21 @@ namespace GUI_C_
         {
             try
             {
-                if (tbID.Text != "0")
+                if (string.IsNullOrWhiteSpace(tbID.Text))
+                {
+                    MessageBox.Show("É necessário inserir um ID para excluir!");
+                }
+                else if (tbID.Text == "0")
+                {
+                    MessageBox.Show("Não é possível excluir o registro de ID 0.");
+                }
+                else
                 {
                     var firebaseClient = new FireSharp.FirebaseClient(config);
-
-                    // Verifique se o registro com o ID fornecido existe no Firebase
                     var existingData = firebaseClient.Get("pacientes/" + tbID.Text);
 
                     if (existingData.Body != "null")
                     {
-                        // Se o registro existe, prossiga com a exclusão
                         var response = await firebaseClient.DeleteAsync("pacientes/" + tbID.Text);
 
                         if (response.StatusCode == System.Net.HttpStatusCode.OK)
@@ -198,10 +202,6 @@ namespace GUI_C_
                     {
                         MessageBox.Show("O registro com o ID fornecido não existe.");
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Não é possível excluir o registro de ID 0.");
                 }
             }
             catch (Exception ex)
@@ -462,8 +462,3 @@ namespace GUI_C_
         public string Observacoes { get; set; }
     }
 }
-
-
-
-
-
