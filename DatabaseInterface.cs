@@ -33,7 +33,7 @@ namespace GUI_C_
             PreencherDataGridViewFirebase();
         }
 
-        IFirebaseConfig config = new FirebaseConfig
+        IFirebaseConfig config = new FirebaseConfig //DEMO
         {
             AuthSecret = "job3oYnbzoisXeHaAJfOBZQwkQMTfLZ6aSin3Dt2",
             BasePath = "https://democontrolepacientes-default-rtdb.firebaseio.com/"
