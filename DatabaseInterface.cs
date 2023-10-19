@@ -96,7 +96,8 @@ namespace GUI_C_
                 if (string.IsNullOrWhiteSpace(tbID.Text))
                 {
                     MessageBox.Show("É necessário inserir um ID para adicionar!");
-                }else if (existingData.Body != "null")
+                }
+                else if (existingData.Body != "null")
                 {
                     MessageBox.Show("ID já existe no banco de dados. Utilize um ID único.");
                 }
@@ -144,7 +145,8 @@ namespace GUI_C_
                 if (string.IsNullOrWhiteSpace(tbID.Text))
                 {
                     MessageBox.Show("É necessário inserir um ID para selecionar!");
-                }else if(data.Body != null)
+                }
+                else if (data.Body != null)
                 {
                     var paciente = data.ResultAs<Paciente>();
 
@@ -225,7 +227,8 @@ namespace GUI_C_
                 if (string.IsNullOrWhiteSpace(tbID.Text))
                 {
                     MessageBox.Show("É necessário inserir um ID para atualizar!");
-                }else if (existingData.Body != "null")
+                }
+                else if (existingData.Body != "null")
                 {
                     var data = client.Get("pacientes/" + tbID.Text);
 
