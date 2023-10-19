@@ -35,8 +35,8 @@ namespace GUI_C_
 
         IFirebaseConfig config = new FirebaseConfig
         {
-            AuthSecret = "YG9GJQGnUbrsz0JCOB5Q7nlVdvcWu75lrfjZVnpz",
-            BasePath = "https://controlepacientes-d535b-default-rtdb.firebaseio.com"
+            AuthSecret = "job3oYnbzoisXeHaAJfOBZQwkQMTfLZ6aSin3Dt2",
+            BasePath = "https://democontrolepacientes-default-rtdb.firebaseio.com/"
         };
 
         private void PreencherDataGridViewFirebase()
