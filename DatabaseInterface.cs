@@ -140,31 +140,41 @@ namespace GUI_C_
         {
             try
             {
-                var data = client.Get("pacientes/" + tbID.Text);
-
                 if (string.IsNullOrWhiteSpace(tbID.Text))
                 {
                     MessageBox.Show("É necessário inserir um ID para selecionar!");
                 }
-                else if (data.Body != null)
-                {
-                    var paciente = data.ResultAs<Paciente>();
-
-                    tbName.Text = paciente.Nome;
-                    tbDate.Text = paciente.DataQui;
-                    tbHospital.Text = paciente.Hospital;
-                    tbArrive.Text = paciente.Chegada;
-                    tbMedicine.Text = paciente.Medicamento;
-                    tbPreQui.Text = paciente.PréQui;
-                    tbDuringQui.Text = paciente.DuranteQui;
-                    tbAfterQui.Text = paciente.ApósQui;
-                    tbObs.Text = paciente.Observacoes;
-
-                    MessageBox.Show("Registro encontrado.");
-                }
                 else
                 {
-                    MessageBox.Show("Nenhum registro encontrado.");
+                    var data = client.Get("pacientes/" + tbID.Text);
+
+                    if (data.Body != null)
+                    {
+                        var paciente = data.ResultAs<Paciente>();
+
+                        if (paciente != null)
+                        {
+                            tbName.Text = paciente.Nome;
+                            tbDate.Text = paciente.DataQui;
+                            tbHospital.Text = paciente.Hospital;
+                            tbArrive.Text = paciente.Chegada;
+                            tbMedicine.Text = paciente.Medicamento;
+                            tbPreQui.Text = paciente.PréQui;
+                            tbDuringQui.Text = paciente.DuranteQui;
+                            tbAfterQui.Text = paciente.ApósQui;
+                            tbObs.Text = paciente.Observacoes;
+
+                            MessageBox.Show("Registro encontrado.");
+                        }
+                        else
+                        {
+                            MessageBox.Show("Nenhum registro encontrado para o ID especificado.");
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nenhum registro encontrado para o ID especificado.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -172,6 +182,7 @@ namespace GUI_C_
                 MessageBox.Show("Erro ao buscar o registro: " + ex.Message);
             }
         }
+
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
